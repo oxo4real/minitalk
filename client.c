@@ -16,6 +16,8 @@ static void	send_char(char c, pid_t kingKai);
 static void	ack_handler(int sig);
 static void	end_handler(int sig);
 
+volatile sig_atomic_t	g_kingKai = 0;
+
 int	main(int ac, char **av)
 {
 	pid_t	server_pid;
@@ -28,6 +30,8 @@ int	main(int ac, char **av)
 		return (EXIT_FAILURE);
 	}
 	server_pid = ft_atoi(av[1]);
+	if (server_pid < 1)
+		return (write(STDERR_FILENO, "Invalid pid\n", 12), EXIT_FAILURE);
 	message = av[2];
 	signal(SIGUSR1, ack_handler);
 	signal(SIGUSR2, end_handler);
@@ -38,8 +42,6 @@ int	main(int ac, char **av)
 	return (EXIT_SUCCESS);
 }
 
-volatile sig_atomic_t	g_kingKai = BUSY;
-
 static void	end_handler(int sig)
 {
 	(void)sig;
@@ -49,25 +51,25 @@ static void	end_handler(int sig)
 static void	ack_handler(int sig)
 {
 	(void)sig;
-	g_kingKai = READY;
+	g_kingKai = 1;
 }
 
-static void	send_char(char c, pid_t kingKai)
+static void	send_char(char c, pid_t server_pid)
 {
 	int	bit;
 
 	bit = 0;
 	while (bit < CHAR_BIT)
 	{
-		while (BUSY == g_kingKai)
+		while (g_kingKai == 0)
 		{
-			if (c & (0x80 >> bit))
-				kill(kingKai, SIGUSR1);
+			if (c & (0b10000000 >> bit))
+				kill(server_pid, SIGUSR2);
 			else
-				kill(kingKai, SIGUSR2);
-			usleep(42);
+				kill(server_pid, SIGUSR1);
+			usleep(1337);
 		}
 		bit++;
-		g_kingKai = BUSY;
+		g_kingKai = 0;
 	}
 }

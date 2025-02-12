@@ -26,6 +26,7 @@ int	main(void)
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
 	ft_putnbr_fd(getpid(), STDOUT_FILENO);
+	write(STDOUT_FILENO, "\n", 1);
 	while (1337)
 		pause();
 }
@@ -41,21 +42,21 @@ static void	handle_signal(int signo, siginfo_t *info, void *more_info)
 		return ;
 	curr_client = info->si_pid;
 	if (signo == SIGUSR1)
-		c &= ~(0b10000000 >> (bit++));
+		c &= ~(0b10000000) >> (bit++);
 	else if (signo == SIGUSR2)
-		c |= (0b10000000 >> (bit++));
+		c |= 0b10000000 >> (bit++);
 	if (bit == CHAR_BIT)
 	{
 		bit = 0;
 		if (c == '\0')
 		{
+			kill(curr_client, SIGUSR2);
 			curr_client = 0;
-			write(STDOUT_FILENO, "\n", 1);
 			c = 0;
-			return ((void)kill(curr_client, SIGUSR1));
+			return ((void)write(STDOUT_FILENO, "\n", 1));
 		}
-		c = 0;
 		write(STDOUT_FILENO, &c, 1);
+		c = 0;
 	}
-	kill(curr_client, SIGUSR2);
+	kill(curr_client, SIGUSR1);
 }
