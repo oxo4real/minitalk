@@ -107,8 +107,8 @@ static void	lst_clr(t_list **list)
 	while (*list)
 	{
 		tmp = (*list);
-		free(*list);
-		(*list) = tmp->next;
+		(*list) = (*list)->next;
+		free(tmp);
 	}
 	(*list) = NULL;
 }

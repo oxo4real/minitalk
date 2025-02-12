@@ -67,7 +67,7 @@ static void	send_char(char c, pid_t server_pid)
 				kill(server_pid, SIGUSR2);
 			else
 				kill(server_pid, SIGUSR1);
-			usleep(1000);
+			usleep(10000);
 		}
 		bit++;
 		g_server_state = BUSY;

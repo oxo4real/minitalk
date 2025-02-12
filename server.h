@@ -18,7 +18,7 @@
 # include <limits.h>
 # include <stdlib.h>
 
-# define TIME_OUT 200
+# define TIME_OUT 13
 
 typedef struct s_list
 {
