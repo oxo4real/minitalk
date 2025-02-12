@@ -12,11 +12,11 @@
 
 #include "client.h"
 
-static void	send_char(char c, pid_t kingKai);
+static void	send_char(char c, pid_t server_pid);
 static void	ack_handler(int sig);
 static void	end_handler(int sig);
 
-volatile sig_atomic_t	g_kingKai = 0;
+volatile sig_atomic_t	g_server_state = BUSY;
 
 int	main(int ac, char **av)
 {
@@ -26,12 +26,12 @@ int	main(int ac, char **av)
 
 	if (ac != 3)
 	{
-		write(STDERR_FILENO, "Usage: ./client <kingKai> \"message\"\n", 36);
+		write(STDERR_FILENO, "Usage: ./client <server_pid> \"message\"\n", 36);
 		return (EXIT_FAILURE);
 	}
 	server_pid = ft_atoi(av[1]);
 	if (server_pid < 1)
-		return (write(STDERR_FILENO, "Invalid pid\n", 12), EXIT_FAILURE);
+		return (write(STDERR_FILENO, "Invalid server_pid\n", 12), EXIT_FAILURE);
 	message = av[2];
 	signal(SIGUSR1, ack_handler);
 	signal(SIGUSR2, end_handler);
@@ -51,7 +51,7 @@ static void	end_handler(int sig)
 static void	ack_handler(int sig)
 {
 	(void)sig;
-	g_kingKai = 1;
+	g_server_state = READY;
 }
 
 static void	send_char(char c, pid_t server_pid)
@@ -61,15 +61,15 @@ static void	send_char(char c, pid_t server_pid)
 	bit = 0;
 	while (bit < CHAR_BIT)
 	{
-		while (g_kingKai == 0)
+		while (g_server_state == BUSY)
 		{
 			if (c & (0b10000000 >> bit))
 				kill(server_pid, SIGUSR2);
 			else
 				kill(server_pid, SIGUSR1);
-			usleep(1337);
+			usleep(1000);
 		}
 		bit++;
-		g_kingKai = 0;
+		g_server_state = BUSY;
 	}
 }

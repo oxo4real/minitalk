@@ -13,6 +13,8 @@
 #include "server.h"
 
 static void	handle_signal(int signo, siginfo_t *info, void *more_info);
+static void	set_bit(int signo, char *c, int bit);
+static int	time_out(t_list **list, pid_t client_pid);
 
 int	main(void)
 {
@@ -36,15 +38,13 @@ static void	handle_signal(int signo, siginfo_t *info, void *more_info)
 	static pid_t	curr_client;
 	static char		c;
 	static int		bit;
+	static t_list	*list;
 
 	(void)more_info;
-	if (curr_client != 0 && info->si_pid != curr_client)
+	if (curr_client != 0 && info->si_pid != curr_client && !time_out(&list, info->si_pid))
 		return ;
 	curr_client = info->si_pid;
-	if (signo == SIGUSR1)
-		c &= ~(0b10000000) >> (bit++);
-	else if (signo == SIGUSR2)
-		c |= 0b10000000 >> (bit++);
+	set_bit(signo, &c, bit);
 	if (bit == CHAR_BIT)
 	{
 		bit = 0;
@@ -59,4 +59,39 @@ static void	handle_signal(int signo, siginfo_t *info, void *more_info)
 		c = 0;
 	}
 	kill(curr_client, SIGUSR1);
+}
+
+static void	set_bit(int signo, char *c, int bit)
+{
+	if (signo == SIGUSR1)
+		(*c) &= ~(0b10000000) >> (bit++);
+	else if (signo == SIGUSR2)
+		(*c) |= 0b10000000 >> (bit++);
+}
+
+static int	time_out(t_list **list, pid_t client_pid)
+{
+	t_list	*head;
+
+	head = (*list);
+	while (head)
+	{
+		if (head->client_pid == client_pid)
+			break ;
+		head = head->next;
+	}
+	if (!head)
+	{
+		head = malloc(sizeof(t_list) * 1);
+		if (!head)
+			return (1);
+		head->client_pid = client_pid;
+		head->requests = 0;
+		head->next = (*list);
+		(*list) = head;
+	}
+	head->requests += 1;
+	if (head->requests == TIME_OUT)
+		return (1);
+	return (0);
 }
