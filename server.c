@@ -6,7 +6,7 @@
 /*   By: aaghzal <aaghzal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/10 19:40:59 by aaghzal           #+#    #+#             */
-/*   Updated: 2025/02/11 14:49:23 by aaghzal          ###   ########.fr       */
+/*   Updated: 2025/02/12 20:49:19 by aaghzal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,8 @@
 
 static void	handle_signal(int signo, siginfo_t *info, void *more_info);
 static void	set_bit(int signo, char *c, int bit);
-static int	time_out(t_list **list, pid_t client_pid);
+static int	time_out(t_list **list, pid_t client_pid, int *bit);
+static void	lst_clr(t_list **list);
 
 int	main(void)
 {
@@ -41,10 +42,11 @@ static void	handle_signal(int signo, siginfo_t *info, void *more_info)
 	static t_list	*list;
 
 	(void)more_info;
-	if (curr_client != 0 && info->si_pid != curr_client && !time_out(&list, info->si_pid))
+	if (curr_client != 0 && !time_out(&list, info->si_pid, &bit) && info->si_pid != curr_client)
 		return ;
+	lst_clr(&list);
 	curr_client = info->si_pid;
-	set_bit(signo, &c, bit);
+	set_bit(signo, &c, bit++);
 	if (bit == CHAR_BIT)
 	{
 		bit = 0;
@@ -64,22 +66,18 @@ static void	handle_signal(int signo, siginfo_t *info, void *more_info)
 static void	set_bit(int signo, char *c, int bit)
 {
 	if (signo == SIGUSR1)
-		(*c) &= ~(0b10000000) >> (bit++);
+		(*c) &= ~(0b10000000) >> bit;
 	else if (signo == SIGUSR2)
-		(*c) |= 0b10000000 >> (bit++);
+		(*c) |= 0b10000000 >> bit;
 }
 
-static int	time_out(t_list **list, pid_t client_pid)
+static int	time_out(t_list **list, pid_t client_pid, int *bit)
 {
 	t_list	*head;
 
 	head = (*list);
-	while (head)
-	{
-		if (head->client_pid == client_pid)
-			break ;
+	while (head && head->client_pid != client_pid)
 		head = head->next;
-	}
 	if (!head)
 	{
 		head = malloc(sizeof(t_list) * 1);
@@ -92,6 +90,25 @@ static int	time_out(t_list **list, pid_t client_pid)
 	}
 	head->requests += 1;
 	if (head->requests == TIME_OUT)
+	{
+		(*bit) = 0;
+		write(STDOUT_FILENO, "\n", 1);
 		return (1);
+	}
 	return (0);
+}
+
+static void	lst_clr(t_list **list)
+{
+	t_list	*tmp;
+
+	if (!list)
+		return ;
+	while (*list)
+	{
+		tmp = (*list);
+		free(*list);
+		(*list) = tmp->next;
+	}
+	(*list) = NULL;
 }

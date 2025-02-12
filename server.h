@@ -6,7 +6,7 @@
 /*   By: aaghzal <aaghzal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/10 19:48:17 by aaghzal           #+#    #+#             */
-/*   Updated: 2025/02/11 14:50:48 by aaghzal          ###   ########.fr       */
+/*   Updated: 2025/02/12 20:50:14 by aaghzal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 # include <limits.h>
 # include <stdlib.h>
 
-# define TIME_OUT 1500
+# define TIME_OUT 200
 
 typedef struct s_list
 {

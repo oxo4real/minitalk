@@ -6,7 +6,7 @@
 /*   By: aaghzal <aaghzal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 13:36:14 by aaghzal           #+#    #+#             */
-/*   Updated: 2025/02/11 14:49:54 by aaghzal          ###   ########.fr       */
+/*   Updated: 2025/02/12 20:08:44 by aaghzal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int	main(int ac, char **av)
 	}
 	server_pid = ft_atoi(av[1]);
 	if (server_pid < 1)
-		return (write(STDERR_FILENO, "Invalid server_pid\n", 12), EXIT_FAILURE);
+		return (write(STDERR_FILENO, "Invalid server_pid\n", 19), EXIT_FAILURE);
 	message = av[2];
 	signal(SIGUSR1, ack_handler);
 	signal(SIGUSR2, end_handler);
