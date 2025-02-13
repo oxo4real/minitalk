@@ -13,7 +13,7 @@
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 BUILD_DIR = build/
-SRC_SERV = server.c ft_putchar_fd.c ft_putnbr_fd.c
+SRC_SERV = server.c ft_putchar_fd.c ft_putnbr_fd.c lst_clr.c
 SRC_USR = client.c ft_atoi.c ft_isdigit.c
 OBJ_SERV = $(addprefix $(BUILD_DIR),$(SRC_SERV:.c=.o))
 OBJ_USR = $(addprefix $(BUILD_DIR),$(SRC_USR:.c=.o))

@@ -14,8 +14,8 @@
 
 static void	handle_signal(int signo, siginfo_t *info, void *more_info);
 static void	set_bit(int signo, char *c, int bit);
-static int	time_out(t_list **list, pid_t client_pid, int *bit);
-static void	lst_clr(t_list **list);
+static int	time_out(t_list **list, pid_t client_pid, int *bit, char *unicode);
+static void	handle_char(char *c, int *curr_client, char *unicode);
 
 int	main(void)
 {
@@ -40,9 +40,11 @@ static void	handle_signal(int signo, siginfo_t *info, void *more_info)
 	static char		c;
 	static int		bit;
 	static t_list	*list;
+	static char		unicode[8] = {0};
 
 	(void)more_info;
-	if (curr_client != 0 && !time_out(&list, info->si_pid, &bit) && info->si_pid != curr_client)
+	if (curr_client != 0 && !time_out(&list, info->si_pid, &bit, unicode)
+		&& info->si_pid != curr_client)
 		return ;
 	lst_clr(&list);
 	curr_client = info->si_pid;
@@ -50,17 +52,10 @@ static void	handle_signal(int signo, siginfo_t *info, void *more_info)
 	if (bit == CHAR_BIT)
 	{
 		bit = 0;
-		if (c == '\0')
-		{
-			kill(curr_client, SIGUSR2);
-			curr_client = 0;
-			c = 0;
-			return ((void)write(STDOUT_FILENO, "\n", 1));
-		}
-		write(STDOUT_FILENO, &c, 1);
-		c = 0;
+		handle_char(&c, &curr_client, unicode);
 	}
-	kill(curr_client, SIGUSR1);
+	if (curr_client != THIS_SERVER)
+		kill(curr_client, SIGUSR1);
 }
 
 static void	set_bit(int signo, char *c, int bit)
@@ -71,7 +66,7 @@ static void	set_bit(int signo, char *c, int bit)
 		(*c) |= 0b10000000 >> bit;
 }
 
-static int	time_out(t_list **list, pid_t client_pid, int *bit)
+static int	time_out(t_list **list, pid_t client_pid, int *bit, char *unicode)
 {
 	t_list	*head;
 
@@ -92,23 +87,38 @@ static int	time_out(t_list **list, pid_t client_pid, int *bit)
 	if (head->requests == TIME_OUT)
 	{
 		(*bit) = 0;
+		unicode[0] = 0;
 		write(STDOUT_FILENO, "\n", 1);
 		return (1);
 	}
 	return (0);
 }
 
-static void	lst_clr(t_list **list)
+static void	handle_char(char *c, int *curr_client, char *unicode)
 {
-	t_list	*tmp;
+	static int	pos;
 
-	if (!list)
-		return ;
-	while (*list)
+	if ((*c) == '\0')
 	{
-		tmp = (*list);
-		(*list) = (*list)->next;
-		free(tmp);
+		kill((*curr_client), SIGUSR2);
+		(*curr_client) = 0;
+		if (unicode[0] != 0)
+			write(STDOUT_FILENO, unicode, pos + 1);
+		unicode[0] = 0;
+		pos = 0;
+		write(STDOUT_FILENO, "\n", 1);
 	}
-	(*list) = NULL;
+	else if ((*c) & 0b10000000 && !((*c) & 0b01000000))
+	{
+		pos++;
+		unicode[pos] = (*c);
+	}
+	else
+	{
+		if (unicode[0] != 0)
+			write(STDOUT_FILENO, unicode, pos + 1);
+		pos = 0;
+		unicode[pos] = (*c);
+	}
+	(*c) = 0;
 }
