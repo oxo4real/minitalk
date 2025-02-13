@@ -6,7 +6,7 @@
 /*   By: aaghzal <aaghzal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/10 19:48:17 by aaghzal           #+#    #+#             */
-/*   Updated: 2025/02/12 20:50:14 by aaghzal          ###   ########.fr       */
+/*   Updated: 2025/02/13 10:08:20 by aaghzal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,10 @@
 
 typedef struct s_list
 {
-    pid_t           client_pid;
-    int             requests;
-    struct s_list   *next;
-}   t_list;
+	pid_t			client_pid;
+	int				requests;
+	struct s_list	*next;
+}	t_list;
 
 void	ft_putchar_fd(char c, int fd);
 void	ft_putnbr_fd(int n, int fd);
