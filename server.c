@@ -6,7 +6,7 @@
 /*   By: aaghzal <aaghzal@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/10 19:40:59 by aaghzal           #+#    #+#             */
-/*   Updated: 2025/02/13 10:10:54 by aaghzal          ###   ########.fr       */
+/*   Updated: 2025/02/14 12:15:45 by aaghzal          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ static void	handle_signal(int signo, siginfo_t *info, void *more_info)
 static void	set_bit(int signo, char *c, int bit)
 {
 	if (signo == SIGUSR1)
-		(*c) &= ~(0b10000000) >> bit;
+		(*c) &= ~((0b10000000) >> bit);
 	else if (signo == SIGUSR2)
 		(*c) |= 0b10000000 >> bit;
 }
