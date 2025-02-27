@@ -6,7 +6,7 @@
 #    By: aaghzal <aaghzal@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/11 14:32:10 by aaghzal           #+#    #+#              #
-#    Updated: 2025/02/11 14:47:56 by aaghzal          ###   ########.fr        #
+#    Updated: 2025/02/27 18:05:37 by aaghzal          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,8 +17,9 @@ SRC_SERV = server.c ft_putchar_fd.c ft_putnbr_fd.c lst_clr.c
 SRC_USR = client.c ft_atoi.c ft_isdigit.c
 OBJ_SERV = $(addprefix $(BUILD_DIR),$(SRC_SERV:.c=.o))
 OBJ_USR = $(addprefix $(BUILD_DIR),$(SRC_USR:.c=.o))
+NAME = server
 
-all: $(BUILD_DIR) server client
+all: $(BUILD_DIR) $(NAME) client
 
 $(BUILD_DIR):
 	@mkdir -p $@
@@ -30,7 +31,7 @@ $(OBJ_SERV): server.h
 
 $(OBJ_USR): client.h
 
-server: $(OBJ_SERV)
+$(NAME): $(OBJ_SERV)
 	$(CC) $(CFLAGS) $^ -o $@
 
 client: $(OBJ_USR)
